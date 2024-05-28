@@ -1,38 +1,113 @@
-﻿// OOPLab2Tpl.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+﻿#include <iostream>
+#include <bitset>
+#include <string>
 
-#include <iostream>
 using namespace std;
-#include "Tasks.h"
-#include "Examples.h"
 
+const int MAX_LENGTH = 128;
 
-/// @brief 
-/// @return 
-int main()
-{
-    cout << "OOP. Template for laboratory work #2.\n";
+// Перша частина коду
+int calculateExpression() {
+    // Задано цілі числа
+    int a, b, c, d;
 
-    char ch = '5';
-    do {
-        system("cls");
-        MenuTask();
-        ch = cin.get();
-        
-        cin.get();
+    // Введення значень
+    cout << "Введіть значення a: ";
+    cin >> a;
+    cout << "Введіть значення b: ";
+    cin >> b;
+    cout << "Введіть значення c: ";
+    cin >> c;
+    cout << "Введіть значення d: ";
+    cin >> d;
 
-        switch (ch) {
-        case '1': task1();   break;
-        case '2': task1();   break;
-        case '3': task1();   break;
-        case '4': task1();   break;
-		case '5':  Examples(); break;
-		case '6': return 0;
-	    }
-        cout << " Press any key and enter\n";
-        ch = cin.get();
-    } while (ch != '6');
+    //обчислення виразу без використання операцій множення та ділення
+
+    // Операція множення на 33: b * 33
+    int mul33 = (b << 5) + b + b; // Еквівалентно (b * 32) + (b * 1)
+
+    // Операція множення на 15: d * 15
+    int mul15 = (d << 4) + (d << 3) - d; // Еквівалентно (d * 16) - (d * 1)
+
+    // Операція множення на 12: a * 12
+    int mul12 = (a << 3) + (a << 2); // Еквівалентно (a * 8) + (a * 4)
+
+    // Операція додавання: (d * 15 + 12 * a)
+    int sum_mul15_mul12 = mul15 + mul12;
+
+    // Операція ділення на 512: (d * 15 + 12 * a) / 512
+    int div512 = sum_mul15_mul12 >> 9; // Еквівалентно (d * 15 + 12 * a) / 512
+
+    // Операція множення на 65: c * 65
+    int mul65 = (c << 6) + (c << 0); // Еквівалентно (c * 64) + (c * 1)
+
+    // Операція множення на 14: d * 14
+    int mul14 = (d << 4) + (d << 1); // Еквівалентно (d * 8) + (d * 4) + (d * 2)
+
+    // Обчислення виразу: 33*b + ((d*15+12*a)/512) - 65*c + d*14
+    int result = mul33 + div512 - mul65 + mul14;
+
+    // Виведення результату
+    cout << "Результат обчислення виразу: " << result << endl;
 
     return 0;
 }
 
+// Друга частина коду - функція для шифрування тексту
+void encryptText(const string& text) {
+    // Перевірка довжини тексту
+    if (text.length() > MAX_LENGTH) {
+        cerr << "Помилка: текст перевищує максимальну довжину." << endl;
+        return;
+    }
+
+    // Зміна розміру тексту до 128 символів, доповнення пробілами
+    string paddedText = text;
+    paddedText.resize(MAX_LENGTH, ' ');
+
+    // Проходимо по кожному символу у тексті
+    for (char c : paddedText) {
+        // Вираховуємо біт парності
+        int parityBit = 0;
+        for (int i = 0; i < 8; ++i) {
+            parityBit ^= (c >> i) & 1; // Визначаємо біт парності, використовуючи XOR
+        }
+
+        // Кодуємо ASCII-код символу та його позицію у два байти
+        unsigned char byte1 = (c & 0xFF); // Перший байт містить ASCII-код символу
+        unsigned char byte2 = ((parityBit << 7) | (c & 0x7F)); // Другий байт містить біт парності та позицію символу
+
+        // Декодування шифрованих байтів
+        // Для демонстрації розшифрування, просто виводимо їх
+        cout << "Шифровані байти: " << bitset<8>(byte1) << " " << bitset<8>(byte2) << endl;
+    }
+}
+
+int main() {
+    setlocale(LC_CTYPE, "ukr");
+    int choice;
+
+    cout << "Виберіть опцію (1 або 2): ";
+    cin >> choice;
+
+    switch (choice) {
+    case 1: {
+        // Викликаємо функцію для обчислення виразу
+        calculateExpression();
+        break;
+    }
+    case 2: {
+        // Введення тексту для шифрування та його шифрування
+        cout << "Введіть текст для шифрування (до 128 символів): ";
+        string inputText;
+        cin.ignore(); // Ігноруємо символ нового рядка, щоб коректно зчитати введений текст
+        getline(cin, inputText); // Зчитуємо введений користувачем текст
+        encryptText(inputText); // Викликаємо функцію для шифрування тексту
+        break;
+    }
+    default:
+        cout << "Невірний вибір опції!";
+    }
+
+    return 0;
+}
